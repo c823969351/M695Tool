@@ -3,6 +3,8 @@ import platform
 from time import sleep
 from usb_device import *
 from usb2iic import *
+REG_VOLT = 0x02
+REG_CURRENT= 0x04
 
 class USB2IIC(object):
     def __init__(self):
@@ -128,16 +130,18 @@ class USB2IIC(object):
         ret = IIC_WriteReadBytes(self.DevHandles[self.DevIndex],self.IICIndex,SlaveAddr,byref(WriteBuffer),len(WriteBuffer),byref(ReadBuffer),len(ReadBuffer),TimeOutMs)
         if ret != IIC_SUCCESS:
             print("WriteRead iic faild!")
-            exit()
+            return 1
         else:
             print("WriteRead iic sunccess!")
-            print("Read %02X Data:",WriteBuffer[0])
+            # print("Read %02X Data:",WriteBuffer[0])
+            print("Read {} Data:".format(hex(WriteBuffer[0])))
             if len(ReadBuffer) > 1:
                 for i in range(0,len(ReadBuffer)):
                     print("%02X "%ReadBuffer[i],end='')
             else:
                 print("%02X "%ReadBuffer[0],end='')
             print("")
+            return 0
     
     def Close_device(self):
         # Close device
@@ -147,12 +151,28 @@ class USB2IIC(object):
         else:
             print("Close device faild!")
             exit()
+    
+    def volt_read(self,SlaveAddr,TimeOutMs=100):
+        WriteBuffer = (c_uint8 * 1)(REG_VOLT)
+        ReadBuffer = (c_uint8 * 2)()
+        self.IIC_Transfer(SlaveAddr,WriteBuffer,ReadBuffer)
+        value = hex(ReadBuffer[0]).split('x')[1] + hex(ReadBuffer[1]).split('x')[1]
+        return int(value,16)
+    
+    def current_read(self,SlaveAddr,TimeOutMs=100):
+        WriteBuffer = (c_uint8 * 1)(REG_CURRENT)
+        ReadBuffer = (c_uint8 * 2)()
+        self.IIC_Transfer(SlaveAddr,WriteBuffer,ReadBuffer)
+        value = hex(ReadBuffer[0]).split('x')[1] + hex(ReadBuffer[1]).split('x')[1]
+        return int(value,16)
+    
+
 
 if __name__ == '__main__': 
     dev = USB2IIC()
-    dev.IIC_init()
-    SlaveAddr = 0x43
-    len = 2
-    ReadBuffer = (c_uint8*len)()
-    dev.IIC_read(SlaveAddr,ReadBuffer)
+    dev.IIC_init(1000000)
+    SlaveAddr = 0x4C
+    a = dev.volt_read(SlaveAddr)
+    print(a)
+    # dev.IIC_read(SlaveAddr,ReadBuffer)
     dev.Close_device()

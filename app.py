@@ -194,23 +194,24 @@ class My_thread(QThread):
         global volt
         global current
         global file_name
+        global IICaddr
         time_monitor()
         excel_creart(file_name)
         while 1:
-            self.mutex.lock()       # 上锁
-            WriteBuffer = (c_uint8 * 1)(REG_VOLT)
-            ReadBuffer_volt = (c_uint16 * 1)()
-            IIC.IIC_Transfer(IICaddr,WriteBuffer,ReadBuffer_volt)
-            WriteBuffer = (c_uint8 * 1)(REG_CURRENT)
-            ReadBuffer_curr = (c_uint16 * 1)()
-            IIC.IIC_Transfer(IICaddr,WriteBuffer,ReadBuffer_curr)
-            
-            volt = volt_value_conv(ReadBuffer_volt[0])
-            current = current_value_conv(ReadBuffer_curr[0])
-            self.show.emit() 
-            excel_write(volt,current,file_name)
-            time.sleep(time_interval)
-            self.mutex.unlock()     # 解锁
+            try:
+                self.mutex.lock()       # 上锁
+                value_volt = IIC.volt_read(IICaddr)
+                value_current = IIC.current_read(IICaddr)
+                
+                volt = volt_value_conv(value_volt)
+                current = current_value_conv(value_current)
+                self.show.emit() 
+                excel_write(volt,current,file_name)
+                time.sleep(time_interval)
+                self.mutex.unlock()     # 解锁
+            except Exception as e:
+                print(e)
+                continue
         # ReadBuffer_volt = (c_uint16 * 1)(2167)
         # ReadBuffer_curr = (c_uint16 * 1)(3200)
         # for i in range(10):
