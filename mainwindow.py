@@ -232,7 +232,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "USB2SPI Test"))
         self.groupBox.setTitle(_translate("MainWindow", "设置"))
-        self.label.setText(_translate("MainWindow", "IICAddr："))
+        self.label.setText(_translate("MainWindow", "IICAddr(H)："))
         self.label_2.setText(_translate("MainWindow", "  00(H)："))
         self.label_3.setText(_translate("MainWindow", "  05(H)："))
         self.label_4.setText(_translate("MainWindow", "CurrentLSB"))

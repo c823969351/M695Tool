@@ -5,8 +5,6 @@ __author__ = 'chenjiwen'
 
 #导入程序运行必须模块
 
-from fileinput import filename
-from logging import exception
 import sys
 from telnetlib import PRAGMA_HEARTBEAT
 from PyQt5 import QtWidgets
@@ -26,15 +24,36 @@ from PyQt5.QtCore import QThread, pyqtSignal,pyqtSlot,QWaitCondition,QMutex
 #导入设备库
 from USB2IICTool import USB2IIC
 from ctypes import *
+from zhexiantu import *
+from write_excel import *
 
 REG_VOLT = 0x02
 REG_CURRENT= 0x04
 enable = 0
 volt = 0
 current = 0
-num = 0
+currenlsb = 1
+file_name = ''
+IICaddr=0
+time_interval = 0.1
 
 CLK_LIST = ['100k','200k','400k']
+
+IIC= USB2IIC()
+
+def time_monitor():
+    print('************')
+    nowtime = time.localtime()
+    strftime_1 = time.strftime("%Y%m%d-%H-%M-%S", nowtime)
+    file_1 = os.getcwd()
+    name = file_1+'\\测试数据\\电源测试{}.csv'.format(strftime_1)
+    global file_name
+    file_name = name
+    print(file_name)
+
+def csv_reader():
+        df = line_chart(file_name)
+        df.drew()
 
 def clk_2_number(index):
     number = {
@@ -51,9 +70,9 @@ def volt_value_conv(value):
 
 def current_value_conv(value):
     global current
-    global num
-    current = value * num
-    return value * num
+    global currenlsb
+    current = value * currenlsb
+    return value * currenlsb
 
 class MyMainForm(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -62,18 +81,15 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
 
         self.setupUi(self)
         self.comboBox_CLK.addItems(CLK_LIST)
-        self.IIC= USB2IIC()
         self.pushButton_init.clicked.connect(self.dev_init)
         self.pushButtonStart.clicked.connect(self.work)
-        self.pushButtonStop.clicked.connect(self.stop)
-        self.workThread = My_thread()
-        self.workThread.show.connect(self.show_power)
+        self.pushButtonStop.clicked.connect(self.stop_thread)
     
     def dev_init(self):
         try:
             clk = self.comboBox_CLK.currentIndex()
             clk = clk_2_number(clk)
-            ret = self.IIC.IIC_init(clk)
+            ret = IIC.IIC_init(clk)
             if ret == 1:
                 self.message_warning()
             else:
@@ -83,15 +99,17 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
     
     def IIC_config(self):
         try:
+            global IICaddr
             self.iicaddr = int(self.lineEdit_IICAddr.text(),16)
             reg_00 = int(self.lineEdit_00H.text(),16)
             reg_05 = int(self.lineEdit_05H.text(),16)
             WriteBuffer = (c_uint16 * 2)(reg_00,reg_05)
             print(WriteBuffer[0],WriteBuffer[1])
-            ret = self.IIC.IIC_write(self.iicaddr,WriteBuffer)
+            ret = IIC.IIC_write(self.iicaddr,WriteBuffer)
             if ret == 1:
                 self.message_warning()
             else:
+                IICaddr = self.iicaddr
                 pass
         except Exception as e:
             print(e)
@@ -107,20 +125,34 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
             print(e)
     
     def work(self):
-        global num
-        num = float(self.lineEdit_currentlsb.text())
-        # self.IIC_config()
-        # WriteBuffer = (c_uint8 * 1)(REG_VOLT)
-        # ReadBuffer_volt = (c_uint16 * 1)()
-        # self.IIC.IIC_Transfer(self.iicaddr,WriteBuffer,ReadBuffer_volt)
-        # WriteBuffer = (c_uint8 * 1)(REG_CURRENT)
-        # ReadBuffer_curr = (c_uint16 * 1)()
-        # self.IIC.IIC_Transfer(self.iicaddr,WriteBuffer,ReadBuffer_curr)
-        self.workThread.start()
+        try:
+            global currenlsb
+            global time_interval
+            currenlsb = float(self.lineEdit_currentlsb.text())
+            time_interval = (int(self.spinBoxTimeRead.value()) * 0.001) 
+            self.IIC_config()
+            self.workThread = My_thread()
+            self.workThread.show.connect(self.show_power)
+            self.workThread.start()
+        except Exception as e:
+            print(e)
 
-    def stop(self):
-        num = float(self.lineEdit_currentlsb.text())
-        print(num)
+    def stop_thread(self):
+        try:
+            if self.workThread:
+                self.workThread.terminate()
+                self.workThread = None
+                # self.msg_dialog.close()     # 停止线程时，关闭弹窗
+                # csv_reader()
+            else:
+                self.message_warning()
+            
+            self.lcdNumberVolt.display(0)
+            self.lcdNumberCurrent.display(0)
+        except Exception as e:
+            print(e)
+            self.message_warning()
+
 
     def message_warning(self):
      #提示
@@ -161,16 +193,36 @@ class My_thread(QThread):
         #     self.mutex.unlock()  # 解锁
         global volt
         global current
-        print(1111111111)
-        ReadBuffer_volt = (c_uint16 * 1)(2167)
-        ReadBuffer_curr = (c_uint16 * 1)(3200)
-        for i in range(10):
+        global file_name
+        time_monitor()
+        excel_creart(file_name)
+        while 1:
+            self.mutex.lock()       # 上锁
+            WriteBuffer = (c_uint8 * 1)(REG_VOLT)
+            ReadBuffer_volt = (c_uint16 * 1)()
+            IIC.IIC_Transfer(IICaddr,WriteBuffer,ReadBuffer_volt)
+            WriteBuffer = (c_uint8 * 1)(REG_CURRENT)
+            ReadBuffer_curr = (c_uint16 * 1)()
+            IIC.IIC_Transfer(IICaddr,WriteBuffer,ReadBuffer_curr)
+            
             volt = volt_value_conv(ReadBuffer_volt[0])
             current = current_value_conv(ReadBuffer_curr[0])
-            self.show.emit()    
-            ReadBuffer_volt[0] += 1000
-            ReadBuffer_curr[0] += 1000
-            time.sleep(0.1)
+            self.show.emit() 
+            excel_write(volt,current,file_name)
+            time.sleep(time_interval)
+            self.mutex.unlock()     # 解锁
+        # ReadBuffer_volt = (c_uint16 * 1)(2167)
+        # ReadBuffer_curr = (c_uint16 * 1)(3200)
+        # for i in range(10):
+        #     self.mutex.lock()  
+        #     volt = volt_value_conv(ReadBuffer_volt[0])
+        #     current = current_value_conv(ReadBuffer_curr[0])
+        #     self.show.emit()    
+        #     ReadBuffer_volt[0] += 1000
+        #     ReadBuffer_curr[0] += 1000
+        #     excel_write(volt,current,file_name)
+        #     time.sleep(0.1)
+        #     self.mutex.unlock()
  
     # 线程暂停
     def pause(self):
