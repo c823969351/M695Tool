@@ -33,6 +33,7 @@ enable = 0
 volt = 0
 current = 0
 currenlsb = 1
+voltATT= 1
 file_name = ''
 IICaddr=0
 time_interval = 0.1
@@ -65,14 +66,14 @@ def clk_2_number(index):
 
 def volt_value_conv(value):
     global volt
-    volt = value * 0.00125
-    return value * 0.00125
+    volt = value * 0.00125 * voltATT
+    return volt
 
 def current_value_conv(value):
     global current
     global currenlsb
     current = value * currenlsb
-    return value * currenlsb
+    return current
 
 class MyMainForm(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -84,7 +85,16 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         self.pushButton_init.clicked.connect(self.dev_init)
         self.pushButtonStart.clicked.connect(self.work)
         self.pushButtonStop.clicked.connect(self.stop_thread)
+        self.pushButton_readdata.clicked.connect(self.read_data)
+        self.pushButton_writedata.clicked.connect(self.write_data)
+        self.pushButton_openfile.clicked.connect(self.open_file)
     
+    def open_file(self):
+        try:
+            os.startfile('测试数据')
+        except Exception as e:
+            print(e)
+
     def dev_init(self):
         try:
             clk = self.comboBox_CLK.currentIndex()
@@ -101,16 +111,31 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         try:
             global IICaddr
             self.iicaddr = int(self.lineEdit_IICAddr.text(),16)
-            reg_00 = int(self.lineEdit_00H.text(),16)
-            reg_05 = int(self.lineEdit_05H.text(),16)
-            WriteBuffer = (c_uint16 * 2)(reg_00,reg_05)
-            print(WriteBuffer[0],WriteBuffer[1])
-            ret = IIC.IIC_write(self.iicaddr,WriteBuffer)
+
+            data = self.lineEdit_00H.text().split(' ')
+            for i in range(len(data)):
+                data[i] = int(data[i],16)
+            WriteBuffer_reg00 = (c_uint8 * 3)(0x00,data[0],data[1])
+            print(WriteBuffer_reg00[0],WriteBuffer_reg00[1],WriteBuffer_reg00[2])
+            ret = IIC.IIC_write(self.iicaddr,WriteBuffer_reg00)
             if ret == 1:
                 self.message_warning()
             else:
                 IICaddr = self.iicaddr
                 pass
+
+            data = self.lineEdit_05H.text().split(' ')
+            for i in range(len(data)):
+                data[i] = int(data[i],16)
+            WriteBuffer_reg05 = (c_uint8 * 3)(0x05,data[0],data[1])
+            print(WriteBuffer_reg05[0],WriteBuffer_reg05[1],WriteBuffer_reg05[2])
+            ret = IIC.IIC_write(self.iicaddr,WriteBuffer_reg05)
+            if ret == 1:
+                self.message_warning()
+            else:
+                IICaddr = self.iicaddr
+                pass
+            
         except Exception as e:
             print(e)
     
@@ -127,8 +152,16 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
     def work(self):
         try:
             global currenlsb
+            global voltATT
             global time_interval
-            currenlsb = float(self.lineEdit_currentlsb.text())
+            if self.lineEdit_currentlsb.text():
+                currenlsb = float(self.lineEdit_currentlsb.text())
+            else:
+                currenlsb = 1
+            if self.lineEdit_VoltATT.text():
+                voltATT = float(self.lineEdit_VoltATT.text())
+            else:
+                voltATT = 1
             time_interval = (int(self.spinBoxTimeRead.value()) * 0.001) 
             self.IIC_config()
             self.workThread = My_thread()
@@ -152,7 +185,42 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         except Exception as e:
             print(e)
             self.message_warning()
+    
+    def read_data(self):
+        try:
+            slaveaddr = int(self.lineEdit_slaveaddr.text(),16)
+            if self.lineEdit_regaddr.text():
+                regaddr = int(self.lineEdit_regaddr.text(),16)
+            else:
+                regaddr = 0x00
+            bytelen = int(self.spinBox_bytenum.value())
+            data = IIC.data_read(slaveaddr,regaddr,1,bytelen)
+            msg = 'R 【{:X}】[{:X}] :{}'.format(slaveaddr,regaddr,data)
+            self.textBrowser.append(msg)     
+        except Exception as e:
+            print(e)
 
+    def write_data(self):
+        try:
+            slaveaddr = int(self.lineEdit_slaveaddr.text(),16)
+            if self.lineEdit_regaddr.text():
+                regaddr = int(self.lineEdit_regaddr.text(),16)
+            else:
+                regaddr = 0x00
+            data = self.lineEdit_writedata.text().split(' ')
+            msg = 'W 【{:X}】[{:X}] :{}'.format(slaveaddr,regaddr,data)
+            self.textBrowser.append(msg) 
+            for i in range(len(data)):
+                data[i] = int(data[i],16)
+            print(data)
+            WriteBuffer = (c_uint8*(len(data) + 1))(regaddr)
+            ret = IIC.IIC_write(slaveaddr,WriteBuffer)
+            if ret == 1:
+                self.message_warning()
+            else:
+                pass
+        except Exception as e:
+            print(e)        
 
     def message_warning(self):
      #提示
@@ -200,9 +268,8 @@ class My_thread(QThread):
         while 1:
             try:
                 self.mutex.lock()       # 上锁
-                value_volt = IIC.volt_read(IICaddr)
-                value_current = IIC.current_read(IICaddr)
-                
+                value_volt = IIC.power_read(IICaddr,REG_VOLT)
+                value_current = IIC.power_read(IICaddr,REG_CURRENT)              
                 volt = volt_value_conv(value_volt)
                 current = current_value_conv(value_current)
                 self.show.emit() 
@@ -211,7 +278,6 @@ class My_thread(QThread):
                 self.mutex.unlock()     # 解锁
             except Exception as e:
                 print(e)
-                continue
         # ReadBuffer_volt = (c_uint16 * 1)(2167)
         # ReadBuffer_curr = (c_uint16 * 1)(3200)
         # for i in range(10):

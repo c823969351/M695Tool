@@ -3,8 +3,7 @@ import platform
 from time import sleep
 from usb_device import *
 from usb2iic import *
-REG_VOLT = 0x02
-REG_CURRENT= 0x04
+
 
 class USB2IIC(object):
     def __init__(self):
@@ -114,7 +113,7 @@ class USB2IIC(object):
         ret = IIC_ReadBytes(self.DevHandles[self.DevIndex],self.IICIndex,SlaveAddr,byref(ReadBuffer),len(ReadBuffer),TimeOutMs)
         if ret != IIC_SUCCESS:
             print("Write iic faild!")
-            exit()
+            return(1)
         else:
             print("Write iic sunccess!")
             print("Read {} Slave Data:".format(hex(SlaveAddr)))
@@ -152,19 +151,24 @@ class USB2IIC(object):
             print("Close device faild!")
             exit()
     
-    def volt_read(self,SlaveAddr,TimeOutMs=100):
-        WriteBuffer = (c_uint8 * 1)(REG_VOLT)
+    def power_read(self,SlaveAddr,Regaddr,TimeOutMs=100):
+        WriteBuffer = (c_uint8 * 1)(Regaddr)
         ReadBuffer = (c_uint8 * 2)()
         self.IIC_Transfer(SlaveAddr,WriteBuffer,ReadBuffer)
         value = hex(ReadBuffer[0]).split('x')[1] + hex(ReadBuffer[1]).split('x')[1]
         return int(value,16)
     
-    def current_read(self,SlaveAddr,TimeOutMs=100):
-        WriteBuffer = (c_uint8 * 1)(REG_CURRENT)
-        ReadBuffer = (c_uint8 * 2)()
+    def data_read(self,SlaveAddr,Regaddr,WriteLen = 1,ReadLen = 2,TimeOutMs=100):
+        WriteBuffer = (c_uint8 * WriteLen)(Regaddr)
+        ReadBuffer = (c_uint8 * ReadLen)()
+        value = ''
         self.IIC_Transfer(SlaveAddr,WriteBuffer,ReadBuffer)
-        value = hex(ReadBuffer[0]).split('x')[1] + hex(ReadBuffer[1]).split('x')[1]
-        return int(value,16)
+        for i in range(ReadLen):
+            value += hex(ReadBuffer[i]) + ' '
+        return value
+    
+    def data_write(self,SlaveAddr,Regaddr,WriteLen = 1,ReadLen = 0,TimeOutMs=100):
+        pass
     
 
 
