@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'chenjiwen'
+__author__ = 'iwen'
 
 
 #导入程序运行必须模块
@@ -8,7 +8,7 @@ __author__ = 'chenjiwen'
 import sys
 from telnetlib import PRAGMA_HEARTBEAT
 from PyQt5 import QtWidgets
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon,QGuiApplication
 import os
 import time
 #PyQt5中使用的基本控件都在PyQt5.QtWidgets模块中
@@ -16,10 +16,9 @@ import time
 from PyQt5.QtWidgets import *
 
 #导入designer工具生成的login模块
-
 from mainwindow import Ui_MainWindow
 
-from PyQt5.QtCore import QThread, pyqtSignal,pyqtSlot,QWaitCondition,QMutex
+from PyQt5.QtCore import QThread, pyqtSignal,pyqtSlot,QWaitCondition,QMutex,Qt
 
 #导入设备库
 from USB2IICTool import USB2IIC
@@ -75,6 +74,7 @@ def current_value_conv(value):
     current = value * currenlsb
     return current
 
+
 class MyMainForm(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
 
@@ -88,6 +88,8 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         self.pushButton_readdata.clicked.connect(self.read_data)
         self.pushButton_writedata.clicked.connect(self.write_data)
         self.pushButton_openfile.clicked.connect(self.open_file)
+   
+
     
     def open_file(self):
         try:
@@ -154,6 +156,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
             global currenlsb
             global voltATT
             global time_interval
+
             if self.lineEdit_currentlsb.text():
                 currenlsb = float(self.lineEdit_currentlsb.text())
             else:
@@ -164,9 +167,11 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                 voltATT = 1
             time_interval = (int(self.spinBoxTimeRead.value()) * 0.001) 
             self.IIC_config()
+            time.sleep(1)
             self.workThread = My_thread()
             self.workThread.show.connect(self.show_power)
             self.workThread.start()
+            self.pushButtonStart.setEnabled(False)
         except Exception as e:
             print(e)
 
@@ -179,7 +184,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                 # csv_reader()
             else:
                 self.message_warning()
-            
+            self.pushButtonStart.setEnabled(True)
             self.lcdNumberVolt.display(0)
             self.lcdNumberCurrent.display(0)
         except Exception as e:
@@ -214,7 +219,10 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                 data[i] = int(data[i],16)
             print(data)
             WriteBuffer = (c_uint8*(len(data) + 1))(regaddr)
+            for i in range(len(data)):
+                WriteBuffer[i+1] = data[i]
             ret = IIC.IIC_write(slaveaddr,WriteBuffer)
+            # ret = IIC.IIC_Transfer(slaveaddr,WriteBuffer,ReadBuffer=(c_uint8 * 1)())
             if ret == 1:
                 self.message_warning()
             else:
@@ -232,10 +240,13 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
      msg_box = QMessageBox(QMessageBox.Information, '提示', msg)
      msg_box.exec_()
 
+    def closeEvent(self, event):
+    # 重写该方法主要是解决打开子窗口时，如果关闭了主窗口但子窗口仍显示的问题，使用sys.exit(0) 时就会只要关闭了主窗口，所有关联的子窗口也会全部关闭
+        sys.exit(0)
 
 
     def close(self):
-        sys.exit(app.exec_())
+        sys.exit(0)
 
 class My_thread(QThread):
     show = pyqtSignal()
@@ -269,6 +280,7 @@ class My_thread(QThread):
             try:
                 self.mutex.lock()       # 上锁
                 value_volt = IIC.power_read(IICaddr,REG_VOLT)
+                time.sleep(0.1)
                 value_current = IIC.power_read(IICaddr,REG_CURRENT)              
                 volt = volt_value_conv(value_volt)
                 current = current_value_conv(value_current)
@@ -278,18 +290,6 @@ class My_thread(QThread):
                 self.mutex.unlock()     # 解锁
             except Exception as e:
                 print(e)
-        # ReadBuffer_volt = (c_uint16 * 1)(2167)
-        # ReadBuffer_curr = (c_uint16 * 1)(3200)
-        # for i in range(10):
-        #     self.mutex.lock()  
-        #     volt = volt_value_conv(ReadBuffer_volt[0])
-        #     current = current_value_conv(ReadBuffer_curr[0])
-        #     self.show.emit()    
-        #     ReadBuffer_volt[0] += 1000
-        #     ReadBuffer_curr[0] += 1000
-        #     excel_write(volt,current,file_name)
-        #     time.sleep(0.1)
-        #     self.mutex.unlock()
  
     # 线程暂停
     def pause(self):
@@ -300,21 +300,3 @@ class My_thread(QThread):
         self._isPause = False
         self.cond.wakeAll()
 
-
-if __name__ == "__main__":
-
-    #固定的，PyQt5程序都需要QApplication对象。sys.argv是命令行参数列表，确保程序可以双击运行
-
-    app = QApplication(sys.argv)
-
-    #初始化
-
-    myWin = MyMainForm()
-
-    #将窗口控件显示在屏幕上
-
-    myWin.show()
-
-    #程序运行，sys.exit方法确保程序完整退出。
-
-    sys.exit(app.exec_())

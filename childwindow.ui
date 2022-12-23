@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>ChildWindow</class>
+ <widget class="QMainWindow" name="ChildWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MS5803温度压力读取</string>
+   <string>九路电源检测</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_13">
@@ -33,7 +33,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberTemp_3">
+            <widget class="QLCDNumber" name="lcdNumberVolt_ELVSS">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -76,7 +76,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_3">
+            <widget class="QLCDNumber" name="lcdNumberCurrent_ELVSS">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -110,9 +110,9 @@
           </layout>
          </item>
          <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_3">
+          <widget class="QCheckBox" name="checkBoxEnable_ELVSS">
            <property name="text">
-            <string>使能</string>
+            <string>小电流挡位</string>
            </property>
           </widget>
          </item>
@@ -125,49 +125,6 @@
          <string>VGH</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_8">
-         <item row="0" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_19">
-           <item>
-            <widget class="QLabel" name="label_33">
-             <property name="text">
-              <string>电压：</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLCDNumber" name="lcdNumberTemp_7">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <family>Arial Black</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="digitCount">
-              <number>7</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_34">
-             <property name="minimumSize">
-              <size>
-               <width>24</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>V</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
          <item row="1" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_20">
            <item>
@@ -178,7 +135,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_7">
+            <widget class="QLCDNumber" name="lcdNumberCurrent_VGH">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -211,12 +168,48 @@
            </item>
           </layout>
          </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_7">
-           <property name="text">
-            <string>使能</string>
-           </property>
-          </widget>
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_19">
+           <item>
+            <widget class="QLabel" name="label_33">
+             <property name="text">
+              <string>电压：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLCDNumber" name="lcdNumberVolt_VGH">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>Arial Black</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="digitCount">
+              <number>7</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_34">
+             <property name="minimumSize">
+              <size>
+               <width>24</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>V</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </widget>
@@ -237,7 +230,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_8">
+            <widget class="QLCDNumber" name="lcdNumberCurrent_VGL">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -280,7 +273,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberTemp_8">
+            <widget class="QLCDNumber" name="lcdNumberVolt_VGL">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -312,13 +305,6 @@
             </widget>
            </item>
           </layout>
-         </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_8">
-           <property name="text">
-            <string>使能</string>
-           </property>
-          </widget>
          </item>
         </layout>
        </widget>
@@ -420,9 +406,9 @@
           </layout>
          </item>
          <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_0">
+          <widget class="QCheckBox" name="checkBoxEnable_ELVDD">
            <property name="text">
-            <string>使能</string>
+            <string>小电流挡位</string>
            </property>
           </widget>
          </item>
@@ -488,7 +474,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_1">
+            <widget class="QLCDNumber" name="lcdNumberCurrent_VDD">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -522,9 +508,9 @@
           </layout>
          </item>
          <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_1">
+          <widget class="QCheckBox" name="checkBoxEnable_VDD">
            <property name="text">
-            <string>使能</string>
+            <string>小电流挡位</string>
            </property>
           </widget>
          </item>
@@ -590,7 +576,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_2">
+            <widget class="QLCDNumber" name="lcdNumberCurrent_VDDIO">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -624,9 +610,9 @@
           </layout>
          </item>
          <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_2">
+          <widget class="QCheckBox" name="checkBoxEnable_VDDIO">
            <property name="text">
-            <string>使能</string>
+            <string>小电流挡位</string>
            </property>
           </widget>
          </item>
@@ -643,6 +629,49 @@
          <string>VBL</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
+         <item row="1" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>电流：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLCDNumber" name="lcdNumberCurrent_VBL">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>Arial Black</family>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="digitCount">
+              <number>7</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_24">
+             <property name="minimumSize">
+              <size>
+               <width>24</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>A</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item row="0" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_13">
            <item>
@@ -686,56 +715,6 @@
            </item>
           </layout>
          </item>
-         <item row="1" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_14">
-           <item>
-            <widget class="QLabel" name="label_23">
-             <property name="text">
-              <string>电流：</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_4">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <family>Arial Black</family>
-               <pointsize>12</pointsize>
-              </font>
-             </property>
-             <property name="digitCount">
-              <number>7</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_24">
-             <property name="minimumSize">
-              <size>
-               <width>24</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>A</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_4">
-           <property name="text">
-            <string>使能</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -755,7 +734,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberTemp_5">
+            <widget class="QLCDNumber" name="lcdNumberVolt_TPVDD">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -798,7 +777,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_5">
+            <widget class="QLCDNumber" name="lcdNumberCurrent_TPVDD">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -831,13 +810,6 @@
            </item>
           </layout>
          </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_5">
-           <property name="text">
-            <string>使能</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -857,7 +829,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberTemp_6">
+            <widget class="QLCDNumber" name="lcdNumberVolt_TPVDDIO">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -900,7 +872,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcdNumberPressure_6">
+            <widget class="QLCDNumber" name="lcdNumberCurrent_TPVDDIO">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
@@ -933,13 +905,6 @@
            </item>
           </layout>
          </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBoxEnable_6">
-           <property name="text">
-            <string>使能</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -957,14 +922,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBoxDevHandle"/>
+         <widget class="QComboBox" name="comboBox_CLK"/>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="pushButton_init">
         <property name="text">
-         <string>设备测试</string>
+         <string>设备初始化</string>
         </property>
        </widget>
       </item>
@@ -1012,19 +977,9 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QPushButton" name="pushButtonSTOP">
           <property name="text">
-           <string>文件路径：</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEditFileName"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButtonSaveDataToFile">
-          <property name="text">
-           <string>自动保存</string>
+           <string>停止</string>
           </property>
          </widget>
         </item>

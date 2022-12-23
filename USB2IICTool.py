@@ -128,6 +128,7 @@ class USB2IIC(object):
     def IIC_Transfer(self,SlaveAddr,WriteBuffer,ReadBuffer,TimeOutMs=100):
         ret = IIC_WriteReadBytes(self.DevHandles[self.DevIndex],self.IICIndex,SlaveAddr,byref(WriteBuffer),len(WriteBuffer),byref(ReadBuffer),len(ReadBuffer),TimeOutMs)
         if ret != IIC_SUCCESS:
+            print(ret)
             print("WriteRead iic faild!")
             return 1
         else:
