@@ -44,9 +44,10 @@ IIC= USB2IIC()
 def time_monitor():
     print('************')
     nowtime = time.localtime()
-    strftime_1 = time.strftime("%Y%m%d-%H-%M-%S", nowtime)
+    strftime_1 = time.strftime("%Y%m%d", nowtime)
+    strftime_2 = time.strftime("%Y%m%d-%H-%M-%S", nowtime)
     file_1 = os.getcwd()
-    name = file_1+'\\测试数据\\电源测试{}.csv'.format(strftime_1)
+    name = file_1 + '\\测试数据\\{}\\电源测试{}.csv'.format(strftime_1, strftime_2)
     global file_name
     file_name = name
     print(file_name)
@@ -167,7 +168,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                 voltATT = 1
             time_interval = (int(self.spinBoxTimeRead.value()) * 0.001) 
             self.IIC_config()
-            time.sleep(1)
+            time.sleep(0.1)
             self.workThread = My_thread()
             self.workThread.show.connect(self.show_power)
             self.workThread.start()

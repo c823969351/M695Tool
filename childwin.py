@@ -32,6 +32,7 @@ volt = 0
 current = 0
 currenlsb = 1
 powername = 'ELVDD'
+dirname = ''
 
 CLK_LIST = ['100k', '200k', '400k']
 
@@ -69,6 +70,38 @@ def current_value_conv(value):
     global currenlsb
     current = value * currenlsb
     return current
+
+def time_monitor():
+    global file_name
+    print('************')
+    name = dirname + '\\{}.csv'.format(powername)
+    file_name = name
+    print(file_name)
+
+def create_dir():
+    global dirname
+    nowtime = time.localtime()
+    strftime = time.strftime("%Y%m%d", nowtime)
+    strftime_1 = time.strftime("%H_%M_%S", nowtime)
+    file_1 = os.getcwd()
+    name = file_1 + '\\测试数据\\{}\\九路监测数据{}'.format(strftime,strftime_1)
+    dirname = name
+    name = name.split('\\')
+    dir = ''
+    for i in range(len(name)):
+        if i == len(name)-1:
+            dir = dir[:-1]
+            if not os.path.exists(dir):
+                os.mkdir(dir)
+        elif i == len(name)-2:
+            dir_1 = dir[:-1]
+            if not os.path.exists(dir_1):
+                os.mkdir(dir_1)
+            b = name[i]+'\\'
+            dir = dir +b
+        else:
+            b = name[i]+'\\'
+            dir = dir +b
 
 
 config = configparser.ConfigParser()
@@ -161,6 +194,7 @@ class MyChildForm(QMainWindow, Ui_ChildWindow):
     def work(self):
         try:
             global time_interval
+            time_interval = (int(self.spinBoxTimeRead.value()) * 0.001) 
             self.power_config()    
             self.workThread = My_thread()
             self.workThread.show.connect(self.led_show)
@@ -251,7 +285,6 @@ class MyChildForm(QMainWindow, Ui_ChildWindow):
         msg_box.exec_()
 
     def closeEvent(self, event):
-    # 重写该方法主要是解决打开子窗口时，如果关闭了主窗口但子窗口仍显示的问题，使用sys.exit(0) 时就会只要关闭了主窗口，所有关联的子窗口也会全部关闭
         self.stop_thread()
 
 class My_thread(QThread):
@@ -273,12 +306,14 @@ class My_thread(QThread):
         # global file_name
         global IICaddr
         global powername
-        # time_monitor()
-        # excel_creart(file_name)
+        global time_interval
+        create_dir()
         while 1:
             try:
                 self.mutex.lock()
                 for powername in power_list:
+                    time_monitor()
+                    excel_creart(file_name)
                     IIC_config(powername)      # 上锁
                     value_volt = IIC.power_read(IICaddr,REG_VOLT)
                     # time.sleep(0.1)
@@ -286,7 +321,7 @@ class My_thread(QThread):
                     volt = volt_value_conv(value_volt)
                     current = current_value_conv(value_current)
                     self.show.emit() 
-                    # excel_write(volt,current,file_name)
+                    excel_write(volt,current,file_name)
                     time.sleep(time_interval)
                 self.mutex.unlock()     # 解锁
             except Exception as e:
