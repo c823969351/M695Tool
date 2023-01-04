@@ -1,0 +1,1 @@
+pyinstaller -w -i Setting.ico -n name test.py

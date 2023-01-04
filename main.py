@@ -12,8 +12,7 @@ from childwin import MyChildForm
 
 from PyQt5.QtCore import Qt
 
-if __name__ == "__main__":
-    
+def M695toolMain():
     # 优化不同分辨率显示
     QGuiApplication.setAttribute(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
@@ -35,3 +34,6 @@ if __name__ == "__main__":
     #程序运行，sys.exit方法确保程序完整退出。
 
     sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    M695toolMain()
