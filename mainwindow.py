@@ -327,7 +327,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "USB2SPI Test"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "M695 Tool"))
         self.label_7.setText(_translate("MainWindow", "从机地址："))
         self.label_8.setText(_translate("MainWindow", "寄存器地址："))
         self.label_13.setText(_translate("MainWindow", "读取字节数："))
